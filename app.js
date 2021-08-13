@@ -3,10 +3,13 @@ const mongoose = require('mongoose')
 const app = express();
 require('dotenv/config') // ACCESS .ENV FILE
 
-//ROUTES 
-app.get('/', (req, res) => {
-    res.send("We are home")
-})
+// ROUTES 
+const homeRoute = require('./routes/home');
+app.use('/home', homeRoute)
+
+const projectsRoutes = require('./routes/projects')
+app.use('/projects', projectsRoutes)
+
 
 //LISTEN ON PORT 3000
 app.listen(3000, () => {
