@@ -1,7 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose')
 const app = express();
+const cors = require('cors');
 require('dotenv/config') // ACCESS .ENV FILE
+
+app.use(express.json())
+app.use(cors());
 
 // ROUTES 
 const homeRoute = require('./routes/home');
@@ -16,8 +20,8 @@ app.listen(3000, () => {
     console.log('listening on port 3000')
 })
 
-//CONNTECT TO MONGODB
+// CONNTECT TO MONGODB
 mongoose.connect(process.env.DB_CONNECTION, 
-{ useNewUrlParser: true }, 
+    { useNewUrlParser: true, useUnifiedTopology: true  }, 
 () => {console.log('Connected to DB')
 })
