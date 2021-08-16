@@ -14,7 +14,11 @@ const ProjectSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    technologies: [],
+    gitHub: {
+        type: String,
+        required: true
+    },
+    technologies: []
 
 })
 
