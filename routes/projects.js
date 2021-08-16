@@ -20,7 +20,8 @@ router.post('/', (req, res) => {
     const project = new Project({
         title: req.body.title,
         description: req.body.description,
-        technologies: req.body.technologies
+        technologies: req.body.technologies,
+        youTube: req.body.youTube
     })
 
     project.save()

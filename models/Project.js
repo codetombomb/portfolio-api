@@ -10,7 +10,7 @@ const ProjectSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    youtubeLink: {
+    youTube: {
         type: String,
         required: true
     },
