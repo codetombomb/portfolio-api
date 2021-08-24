@@ -14,6 +14,9 @@ app.use('/home', homeRoute)
 const projectsRoutes = require('./routes/projects')
 app.use('/projects', projectsRoutes)
 
+const aboutRoute = require('./routes/about')
+app.use('/about', aboutRoute)
+
 
 //LISTEN ON PORT 3000
 app.listen(4000, () => {
