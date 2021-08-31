@@ -20,6 +20,7 @@ router.post('/', (req, res) => {
     const project = new Project({
         title: req.body.title,
         description: req.body.description,
+        imgName: req.body.imgName,
         youTube: req.body.youTube,
         gitHub: req.body.gitHub,
         technologies: req.body.technologies
