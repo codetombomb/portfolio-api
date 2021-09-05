@@ -30,10 +30,8 @@ const fireItUp = async () => {
         await mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
             useUnifiedTopology: true
-        },
-        () => {
-            console.log('Connected to DB');
         })
+        console.log('Connected to %d', port)
     } catch (err) {
             console.log('Failed to connect to MongoDB', err);
     }
