@@ -26,7 +26,11 @@ app.listen(port, () => {
 
 // CONNTECT TO MONGODB
 mongoose.connect(`${process.env.DB_CONNECTION}`,
-    { useNewUrlParser: true, useUnifiedTopology: true },
+    { 
+        useNewUrlParser: true, 
+        useUnifiedTopology: true,
+        socketTimeoutMS: 60000
+    },
     () => {
         console.log('Connected to DB')
     })
