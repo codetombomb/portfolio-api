@@ -25,12 +25,22 @@ app.listen(port, () => {
 })
 
 // CONNTECT TO MONGODB
-mongoose.connect(`${process.env.DB_CONNECTION}`,
-    { 
-        useNewUrlParser: true, 
-        useUnifiedTopology: true,
-        socketTimeoutMS: 60000
-    },
-    () => {
-        console.log('Connected to DB')
-    })
+try {
+    mongoose.connect(`${process.env.DB_CONNECTION}`,
+        {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        },
+        () => {
+            console.log('Connected to DB');
+        })
+} catch (e){
+    console.log(e)
+}
+
+
+    // try {
+    //     await mongoose.connect('mongodb://localhost:27017/test');
+    //   } catch (error) {
+    //     handleError(error);
+    //   }
