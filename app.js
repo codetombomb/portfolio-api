@@ -25,22 +25,18 @@ app.listen(port, () => {
 })
 
 // CONNTECT TO MONGODB
-try {
-    mongoose.connect(`${process.env.DB_CONNECTION}`,
-        {
+const fireItUp = async () => {
+    try {
+        await mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         },
         () => {
             console.log('Connected to DB');
         })
-} catch (e){
-    console.log(e)
+    } catch (err) {
+            console.log('Failed to connect to MongoDB', err);
+    }
 }
 
-
-    // try {
-    //     await mongoose.connect('mongodb://localhost:27017/test');
-    //   } catch (error) {
-    //     handleError(error);
-    //   }
+fireItUp();
