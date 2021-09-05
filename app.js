@@ -17,10 +17,11 @@ app.use('/projects', projectsRoutes)
 const aboutRoute = require('./routes/about')
 app.use('/about', aboutRoute)
 
+const port = process.env.PORT || 4000;
 
 //LISTEN ON PORT 3000
-app.listen(4000, () => {
-    console.log('listening on port 4000')
+app.listen(port, () => {
+    console.log('listening on %d', port)
 })
 
 // CONNTECT TO MONGODB
