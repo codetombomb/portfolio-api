@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose')
 const app = express();
 const cors = require('cors');
-require('dotenv/config') // ACCESS .ENV FILE
-
+// require('dotenv/config') // ACCESS .ENV FILE
+require('dotenv').config({ path: './.env' });
 app.use(express.json())
 app.use(cors());
 
