@@ -29,7 +29,8 @@ const fireItUp = async () => {
     try {
         await mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            bufferMaxEntries: 0
         })
         console.log('Connected to %d', port)
     } catch (err) {
