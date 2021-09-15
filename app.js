@@ -31,10 +31,10 @@ const fireItUp = async () => {
             useUnifiedTopology: true,
             family: 4 // Use IPv4, skip trying IPv6
         })
-        app.listen(port, () => {
-            console.log('listening on %d', port)
-        })
-        // console.log('Connected to %d', port)
+        // app.listen(port, () => {
+        //     console.log('listening on %d', port)
+        // })
+        console.log('Connected to %d', port)
     } catch (err) {
             console.log('Failed to connect to MongoDB', err);
     }
