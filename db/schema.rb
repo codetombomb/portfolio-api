@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(version: 2021_09_15_184848) do
   end
 
   create_table "technologies", force: :cascade do |t|
-    t.string "name"
+    t.string "tech"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

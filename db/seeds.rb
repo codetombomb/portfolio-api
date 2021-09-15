@@ -12,7 +12,7 @@ technologies = [
 ]
 
 technologies.each do |tech|
-  Technology.create(name: tech)
+  Technology.create(tech: tech)
 end
 
 cc = Project.create(
