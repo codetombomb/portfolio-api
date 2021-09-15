@@ -22,9 +22,9 @@ const port = process.env.PORT || 4000;
 //LISTEN ON PORT 3000
 
 // CONNTECT TO MONGODB
-const fireItUp = () => {
+const fireItUp = async () => {
     try {
-        mongoose.connect(`${process.env.DB_CONNECTION}`, {
+        await mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
             useCreateIndex: true,
             useFindAndModify: false,
