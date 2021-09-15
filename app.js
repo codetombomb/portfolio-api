@@ -29,8 +29,10 @@ const fireItUp = async () => {
     try {
         await mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
+            useCreateIndex: true,
+            useFindAndModify: false,
             useUnifiedTopology: true,
-            bufferMaxEntries: 0
+            family: 4 // Use IPv4, skip trying IPv6
         })
         console.log('Connected to %d', port)
     } catch (err) {
