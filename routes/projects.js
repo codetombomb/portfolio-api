@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project')
 
-router.get('/', (req, res) => {
+router.get('/',async (req, res) => {
     try {
-        const projects = Project.find();
+        const projects = await Project.find();
         res.send(projects)
     } catch (err) {
         res.json({ message: err.message })
