@@ -20,21 +20,21 @@ app.use('/about', aboutRoute)
 const port = process.env.PORT || 4000;
 
 //LISTEN ON PORT 3000
-app.listen(port, () => {
-    console.log('listening on %d', port)
-})
 
 // CONNTECT TO MONGODB
-const fireItUp = async () => {
+const fireItUp = () => {
     try {
-        await mongoose.connect(`${process.env.DB_CONNECTION}`, {
+        mongoose.connect(`${process.env.DB_CONNECTION}`, {
             useNewUrlParser: true,
             useCreateIndex: true,
             useFindAndModify: false,
             useUnifiedTopology: true,
             family: 4 // Use IPv4, skip trying IPv6
         })
-        console.log('Connected to %d', port)
+        app.listen(port, () => {
+            console.log('listening on %d', port)
+        })
+        // console.log('Connected to %d', port)
     } catch (err) {
             console.log('Failed to connect to MongoDB', err);
     }
