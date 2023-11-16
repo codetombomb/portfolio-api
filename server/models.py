@@ -3,7 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 
 from config import db
 
-class Admin(db.Model, SerializerMixin):
+class Admin(db.Model):
     __tablename__ = "admins"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -13,11 +13,12 @@ class Admin(db.Model, SerializerMixin):
 
     chats = db.relationship("Chat", backref="admins")
 
+    serialize_rules = ("-admins", )
+
     _password_hash = db.Column(db.String)
     
     @hybrid_property
     def password_hash(self):
-        import ipdb; ipdb.set_trace()
         return self._password_hash
         raise Exception("Cannot access password hashes")
     
@@ -32,7 +33,7 @@ class Admin(db.Model, SerializerMixin):
     def __repr__(self):
         return f"\n<Admin id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
     
-class Chat(db.Model, SerializerMixin):
+class Chat(db.Model):
     __tablename__ = "chats"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -41,14 +42,13 @@ class Chat(db.Model, SerializerMixin):
     admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"))
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"))
 
-    serialize_rules = ("-admin.chats", "-visitor.chats")
     messages = db.relationship("Message", backref="chats")
 
     def __repr__(self):
         return f"\n<Chat id={self.id},\n\tcreated_at={self.created_at},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id} \n>"
     
 
-class Message(db.Model, SerializerMixin):
+class Message(db.Model):
     __tablename__ = "messages"
     id = db.Column(db.Integer, primary_key=True)
 
@@ -69,7 +69,7 @@ class Message(db.Model, SerializerMixin):
         return f"\n<Message id={self.id},\n\tcreated_at={self.created_at},\n\tcontent={self.content},\n\tchat_id={self.chat_id},\n\tsender_type={self.sender_type},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id}\n>"
 
 
-class Visitor(db.Model, SerializerMixin):
+class Visitor(db.Model):
     __tablename__ = "visitors"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -81,6 +81,4 @@ class Visitor(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"\n<User id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
-    
-
     

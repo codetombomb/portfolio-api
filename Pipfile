@@ -16,6 +16,8 @@ faker = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 gunicorn = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
 
 [dev-packages]
 
