@@ -10,6 +10,9 @@ class MessageSchema(ma.SQLAlchemySchema):
     sender_type = ma.auto_field()
     admin_id = ma.auto_field()
     visitor_id = ma.auto_field()
+
+message_schema = MessageSchema()
+messages_schema = MessageSchema(many=True)
     
 
 class ChatSchema(ma.SQLAlchemySchema):
@@ -22,6 +25,9 @@ class ChatSchema(ma.SQLAlchemySchema):
     visitor_id = ma.auto_field()
 
     messages = ma.Nested(MessageSchema(only=("id", "created_at", "content", "sender_type", "admin_id", "visitor_id", )),many=True)
+
+chat_schema = ChatSchema()
+chats_schema = ChatSchema(many=True)
 
 
 class AdminSchema(ma.SQLAlchemySchema):
