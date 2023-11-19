@@ -8,6 +8,8 @@ from config import app, api, db
 
 from serializers import admin_schema, admins_schema, chats_schema, chat_schema, messages_schema, message_schema, visitor_schema
 
+import uuid
+
 @app.route('/')
 def index():
     return "<h1>Hello from root!</h1>"
@@ -25,9 +27,32 @@ class Chats(Resource):
 
     def post(self):
         form_json = request.get_json()
+        
+        if form_json["visitor_id"] == "":
+            new_visitor = Visitor(
+                first_name="Visitor",
+                last_name=str(uuid.uuid4())
+            )
+
+            db.session.add(new_visitor)
+            db.session.commit()
+            form_json["visitor_id"] = new_visitor.id
+
+        if form_json["admin_id"] == "":
+            new_admin = Admin(
+                first_name="Admin",
+                last_name=str(uuid.uuid4())
+            )
+
+            db.session.add(new_admin)
+            db.session.commit()
+            form_json["admin_id"] = new_admin.id
+
+
         new_chat = Chat(
             admin_id=form_json['admin_id'],
             visitor_id=form_json['visitor_id'],
+            room_id=form_json['room_id']
         )
 
         db.session.add(new_chat)

@@ -3,6 +3,8 @@ from sqlalchemy_serializer import SerializerMixin
 
 from config import db
 
+from datetime import datetime
+
 class Admin(db.Model):
     __tablename__ = "admins"
 
@@ -38,9 +40,11 @@ class Chat(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-
     admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"))
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"))
+    room_id = db.Column(db.String)
+
+    chat_time_stamp = db.Column(db.String, default=datetime.now().strftime("%a %-I:%m %p"))
 
     messages = db.relationship("Message", backref="chats")
 
