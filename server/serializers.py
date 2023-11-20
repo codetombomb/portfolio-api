@@ -22,7 +22,6 @@ class ChatSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     admin_id = ma.auto_field()
     visitor_id = ma.auto_field()
-    chat_time_stamp = ma.auto_field()
 
     messages = ma.Nested(MessageSchema(only=("id", "created_at", "content", "sender_type", "admin_id", "visitor_id", )),many=True)
 
@@ -38,7 +37,7 @@ class AdminSchema(ma.SQLAlchemySchema):
     last_name = ma.auto_field()
     email = ma.auto_field()
 
-    chats = ma.Nested(ChatSchema(only=("id", "visitor_id", "chat_time_stamp", "messages")),many=True)
+    chats = ma.Nested(ChatSchema(only=("id", "visitor_id", "messages")),many=True)
     
 admin_schema = AdminSchema()
 admins_schema = AdminSchema(many=True)

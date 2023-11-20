@@ -2,7 +2,7 @@ from flask import request, make_response, session
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound, Unauthorized
 
-from models import Visitor, Admin, Chat
+from models import Visitor, Admin, Chat, Message
 
 from config import app, api, db
 
@@ -79,7 +79,38 @@ class Chats(Resource):
         return response
 
 api.add_resource(Chats, '/chats')
-        
+
+class Messages(Resource):
+
+    def get(self):
+        pass
+
+    def post(self):
+        form_json = request.get_json()
+
+        new_message = Message(
+            content=form_json["content"],
+            sender_type=form_json["sender_type"],
+            chat_id=form_json["chat_id"]
+        )
+
+        if form_json["sender_type"] == "Visitor":
+            new_message.visitor_id = form_json["visitor_id"]
+        else:
+            new_message.admin_id = form_json["admin_id"]
+            
+
+        db.session.add(new_message)
+        db.session.commit()
+
+        response = make_response(
+            message_schema.dump(new_message),
+            201,
+        )
+
+        return response
+    
+api.add_resource(Messages, '/messages')
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
