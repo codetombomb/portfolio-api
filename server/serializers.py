@@ -1,5 +1,5 @@
 from config import ma
-from models import Admin, Chat, Message
+from models import Admin, Chat, Message, Visitor
 
 class MessageSchema(ma.SQLAlchemySchema):
     class Meta:
@@ -43,3 +43,17 @@ class AdminSchema(ma.SQLAlchemySchema):
     
 admin_schema = AdminSchema()
 admins_schema = AdminSchema(many=True)
+
+
+class VisitorSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Visitor
+    id = ma.auto_field()
+    first_name = ma.auto_field()
+    last_name = ma.auto_field()
+    email = ma.auto_field()
+
+    chats = ma.Nested(ChatSchema(only=("id", "created_at", "visitor_id", "messages")),many=True)
+    
+visitor_schema = VisitorSchema()
+visitors_schema = VisitorSchema(many=True)
