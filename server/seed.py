@@ -96,7 +96,8 @@ with app.app_context():
         
         print("Done seeding ✅")
 
-    seed_db()
+    # seed_db()
+    clear_entries()
         
 
 
