@@ -81,6 +81,15 @@ class Chats(Resource):
 api.add_resource(Chats, '/chats')
 
 class ChatsById(Resource):
+    def get(self, id):
+        chat = Chat.query.filter_by(id=id).first()
+        response = make_response(
+            chat_schema.dump(chat),
+            200,
+        )
+        return response
+
+
     def patch(self, id):
         form_json = request.get_json()
         chat = Chat.query.filter_by(id=id).first()
