@@ -30,7 +30,7 @@ api.add_resource(AdminsById, '/admins/<int:id>')
 class Chats(Resource):
 
     def get(self):    
-        chats = Chat.query.all()
+        chats = Chat.query.filter_by(is_active=True).all()
         response = make_response(
             chats_schema.dump(chats),
             200,
