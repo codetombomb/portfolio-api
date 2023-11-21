@@ -53,7 +53,7 @@ class VisitorSchema(ma.SQLAlchemySchema):
     last_name = ma.auto_field()
     email = ma.auto_field()
 
-    chats = ma.Nested(ChatSchema(only=("id", "created_at", "visitor_id", "messages")),many=True)
+    chats = ma.Nested(ChatSchema(only=("id", "visitor_id", "messages")),many=True)
     
 visitor_schema = VisitorSchema()
 visitors_schema = VisitorSchema(many=True)
