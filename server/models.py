@@ -44,6 +44,8 @@ class Chat(db.Model):
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"))
     room_id = db.Column(db.String)
 
+    is_active = db.Column(db.Boolean, default=True)
+
     messages = db.relationship("Message", backref="chats")
 
     def __repr__(self):

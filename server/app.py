@@ -80,6 +80,25 @@ class Chats(Resource):
 
 api.add_resource(Chats, '/chats')
 
+class ChatsById(Resource):
+    def patch(self, id):
+        form_json = request.get_json()
+        chat = Chat.query.filter_by(id=id).first()
+        for attr in form_json:
+            setattr(chat, attr, form_json[attr])
+
+        db.session.add(chat)
+        db.session.commit()
+
+        response = make_response(
+            chat_schema.dump(chat),
+            200
+        )
+
+        return response
+
+api.add_resource(ChatsById, '/chats/<int:id>')
+
 class Messages(Resource):
 
     def get(self):
