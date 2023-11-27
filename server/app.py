@@ -1,4 +1,4 @@
-from flask import request, make_response, session
+from flask import request, make_response, session, render_template
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound, Unauthorized
 
@@ -12,7 +12,7 @@ import uuid
 
 @app.route('/')
 def index():
-    return "<h1>Hello from root!</h1>"
+    return render_template("index.html")
 
 class AdminsById(Resource):
     def get(self, id):
@@ -68,9 +68,11 @@ class Chats(Resource):
             room_id=form_json['room_id']
         )
 
+
         db.session.add(new_chat)
         db.session.commit()
 
+        print(chat_schema.dump(new_chat))
         response = make_response(
             chat_schema.dump(new_chat),
             201,
@@ -103,6 +105,8 @@ class ChatsById(Resource):
             chat_schema.dump(chat),
             200
         )
+
+        print(chat_schema.dump(chat))
 
         return response
 
