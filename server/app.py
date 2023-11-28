@@ -144,5 +144,33 @@ class Messages(Resource):
     
 api.add_resource(Messages, '/messages')
 
+@app.route("/login", methods=['POST'])
+def login():
+    email_whitelist = ["codetombomb@gmail.com", "ashton.s.tobar@gmail.com"]
+    form_json = request.get_json()
+    admin = Admin.query.filter(Admin.email == form_json["email"]).first()
+    if not admin and form_json["email"] in email_whitelist:
+        admin = Admin(
+            email=form_json["email"],
+            first_name=form_json["first_name"],
+            last_name=form_json["last_name"]
+        )
+        db.session.add(admin)
+        db.session.commit()
+        
+    if admin and admin.email in email_whitelist:
+        session['admin_id'] = admin.id
+        response = make_response(
+            admin_schema.dump(admin),
+            200
+        )
+    else:
+        response = make_response(
+            {"errors": ["Not authorized"]},
+            401
+        )
+    return response
+    
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
