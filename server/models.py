@@ -5,6 +5,7 @@ from config import db
 
 from datetime import datetime
 
+
 class Admin(db.Model):
     __tablename__ = "admins"
 
@@ -14,27 +15,14 @@ class Admin(db.Model):
     email = db.Column(db.String)
 
     chats = db.relationship("Chat", backref="admins")
+    is_active = db.Column(db.Boolean, default=False)
 
-    serialize_rules = ("-admins", )
-
-    _password_hash = db.Column(db.String)
-    
-    @hybrid_property
-    def password_hash(self):
-        return self._password_hash
-        raise Exception("Cannot access password hashes")
-    
-    @password_hash.setter
-    def password_hash(self, password):
-        hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
-        self._password_hash = hashed_pw
-
-    def authenticate(self, provided_password):
-        return bcrypt.check_password_hash(self._password_hash, provided_password)
+    serialize_rules = ("-admins",)
 
     def __repr__(self):
         return f"\n<Admin id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
-    
+
+
 class Chat(db.Model):
     __tablename__ = "chats"
 
@@ -50,7 +38,7 @@ class Chat(db.Model):
 
     def __repr__(self):
         return f"\n<Chat id={self.id},\n\tcreated_at={self.created_at},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id} \n>"
-    
+
 
 class Message(db.Model):
     __tablename__ = "messages"
@@ -67,7 +55,9 @@ class Message(db.Model):
     admin = db.relationship("Admin", foreign_keys=[admin_id], backref="admin_messages")
 
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"), nullable=True)
-    visitor = db.relationship("Visitor", foreign_keys=[visitor_id], backref="visitor_messages")
+    visitor = db.relationship(
+        "Visitor", foreign_keys=[visitor_id], backref="visitor_messages"
+    )
 
     def __repr__(self):
         return f"\n<Message id={self.id},\n\tcreated_at={self.created_at},\n\tcontent={self.content},\n\tchat_id={self.chat_id},\n\tsender_type={self.sender_type},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id}\n>"
@@ -85,4 +75,3 @@ class Visitor(db.Model):
 
     def __repr__(self):
         return f"\n<User id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
-    
