@@ -153,6 +153,8 @@ def login():
             email=form_json["email"],
             first_name=form_json["first_name"],
             last_name=form_json["last_name"],
+            picture=form_json["picture"],
+            name=form_json["name"]
         )
         db.session.add(admin)
         db.session.commit()

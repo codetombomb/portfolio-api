@@ -13,6 +13,8 @@ class Admin(db.Model):
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     email = db.Column(db.String)
+    picture = db.Column(db.String)
+    name = db.Column(db.String)
 
     chats = db.relationship("Chat", backref="admins")
     is_active = db.Column(db.Boolean, default=False)
