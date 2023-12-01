@@ -71,7 +71,6 @@ class Chats(Resource):
         db.session.add(new_chat)
         db.session.commit()
 
-        print(chat_schema.dump(new_chat))
         response = make_response(
             chat_schema.dump(new_chat),
             201,

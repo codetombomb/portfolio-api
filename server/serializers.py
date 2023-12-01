@@ -25,6 +25,7 @@ class ChatSchema(ma.SQLAlchemySchema):
 
     is_active = ma.auto_field()
     room_id =  ma.auto_field()
+    is_active = ma.auto_field()
 
     messages = ma.Nested(MessageSchema(only=("id", "created_at", "content", "sender_type", "admin_id", "visitor_id")),many=True)
 
