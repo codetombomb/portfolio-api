@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
 import os
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -10,6 +11,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
+from oauthlib.oauth2 import WebApplicationClient
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_KEY")
@@ -21,6 +23,8 @@ app.json.compact = False
 db = SQLAlchemy()
 ma = Marshmallow(app)
 
+client = WebApplicationClient(os.environ.get("GOOGLE_CLIENT_ID"))
+
 migrate = Migrate(app, db)
 db.init_app(app)
 
@@ -29,5 +33,3 @@ bcrypt = Bcrypt(app)
 CORS(app)
 
 api = Api(app)
-
-# import ipdb; ipdb.set_trace()

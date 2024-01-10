@@ -1,22 +1,23 @@
-from flask import request, make_response, session, render_template
+import uuid
+import json
+import requests
+import os
+
+from flask import request, make_response, session, render_template, redirect
 from flask_restful import Resource
-from werkzeug.exceptions import NotFound, Unauthorized
-
+from werkzeug.exceptions import NotFound
 from models import Visitor, Admin, Chat, Message
-
-from config import app, api, db
-
+from config import app, api, db, client
 from serializers import (
     admin_schema,
     admins_schema,
     chats_schema,
     chat_schema,
-    messages_schema,
     message_schema,
 )
 
-import uuid
-
+# For developement (allow http for oauthlib) - remove from production
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -141,32 +142,85 @@ class Messages(Resource):
 
 api.add_resource(Messages, "/messages")
 
+def get_google_provider_cfg():
+    return requests.get(os.environ.get("GOOGLE_DISCOVERY_URL")).json()
 
-@app.route("/login", methods=["POST"])
+@app.route("/login")
 def login():
+    print("Logging in")
+    google_provider_cfg = get_google_provider_cfg()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+    
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=['openid', 'email', 'profile']
+    )
+
+    return redirect(request_uri)
+
+
+@app.route("/login/callback")
+def callback():
+
+    print("in the callback")
+
+    code = request.args.get("code")
+    print("This is the code", code)
+    google_provider_cfg = get_google_provider_cfg()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
+        code=code
+    )
+
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(os.environ.get('GOOGLE_CLIENT_ID'), os.environ.get('GOOGLE_CLIENT_SECRET'))
+    )
+
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    admininfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+    uri, headers, body = client.add_token(admininfo_endpoint)
+    admininfo_response = requests.get(uri, headers=headers, data=body).json()
+
     email_whitelist = ["codetombomb@gmail.com", "ashton.s.tobar@gmail.com"]
-    form_json = request.get_json()
-    admin = Admin.query.filter(Admin.email == form_json["email"]).first()
-    if not admin and form_json["email"] in email_whitelist:
+
+    admin = Admin.query.filter(Admin.email == admininfo_response["email"]).first()
+
+    if not admin and admininfo_response["email"] in email_whitelist:
+        print("creating admin")
         admin = Admin(
-            email=form_json["email"],
-            first_name=form_json["first_name"],
-            last_name=form_json["last_name"],
-            picture=form_json["picture"],
-            name=form_json["name"]
+            email=admininfo_response["email"],
+            first_name=admininfo_response["first_name"],
+            last_name=admininfo_response["last_name"],
+            picture=admininfo_response["picture"],
+            name=admininfo_response["name"],
         )
+        admin.is_active = True
+        session["admin_id"] = admin.id
         db.session.add(admin)
         db.session.commit()
+        redirect_url = f"{os.environ.get('FRONTEND_URL')}/?admin={admin_schema.dumps(admin)}"
+        return redirect(redirect_url)
 
     if admin and admin.email in email_whitelist:
+        print("Admin exists and email whitelisted")
         session["admin_id"] = admin.id
         admin.is_active = True
         db.session.add(admin)
         db.session.commit()
-        response = make_response(admin_schema.dump(admin), 200)
+        redirect_url = f"{os.environ.get('FRONTEND_URL')}/?admin={admin_schema.dumps(admin)}"
+        return redirect(redirect_url)
     else:
         response = make_response({"errors": ["Not authorized"]}, 401)
-    return response
+        return response
 
 
 @app.route("/logout/<int:id>", methods=["DELETE"])

@@ -18,6 +18,9 @@ python-dotenv = "*"
 gunicorn = "*"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
+authlib = "*"
+requests = "*"
+oauthlib = "*"
 
 [dev-packages]
 
