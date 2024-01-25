@@ -17,7 +17,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -118,10 +118,13 @@ class Messages(Resource):
     def post(self):
         form_json = request.get_json()
 
+        created_at = Message.parse_iso_datetime(form_json["created_at"])
+
         new_message = Message(
             content=form_json["content"],
             sender_type=form_json["sender_type"],
             chat_id=form_json["chat_id"],
+            created_at=created_at
         )
 
         if form_json["sender_type"] == "Visitor":

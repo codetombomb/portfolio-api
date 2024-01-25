@@ -33,6 +33,8 @@ class Chat(db.Model):
     admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"))
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"))
     room_id = db.Column(db.String)
+    
+    
 
     is_active = db.Column(db.Boolean, default=True)
 
@@ -60,6 +62,10 @@ class Message(db.Model):
     visitor = db.relationship(
         "Visitor", foreign_keys=[visitor_id], backref="visitor_messages"
     )
+
+    @classmethod
+    def parse_iso_datetime(self, iso_string):
+        return datetime.strptime(iso_string, "%Y-%m-%dT%H:%M:%S.%f%z")
 
     def __repr__(self):
         return f"\n<Message id={self.id},\n\tcreated_at={self.created_at},\n\tcontent={self.content},\n\tchat_id={self.chat_id},\n\tsender_type={self.sender_type},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id}\n>"
