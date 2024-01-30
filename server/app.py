@@ -17,7 +17,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -103,8 +103,6 @@ class ChatsById(Resource):
 
         response = make_response(chat_schema.dump(chat), 200)
 
-        print(chat_schema.dump(chat))
-
         return response
 
 
@@ -150,7 +148,6 @@ def get_google_provider_cfg():
 
 @app.route("/login")
 def login():
-    print("Logging in")
     google_provider_cfg = get_google_provider_cfg()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
     
@@ -165,11 +162,7 @@ def login():
 
 @app.route("/login/callback")
 def callback():
-
-    print("in the callback")
-
     code = request.args.get("code")
-    print("This is the code", code)
     google_provider_cfg = get_google_provider_cfg()
     token_endpoint = google_provider_cfg["token_endpoint"]
 
@@ -198,7 +191,6 @@ def callback():
     admin = Admin.query.filter(Admin.email == admininfo_response["email"]).first()
 
     if not admin and admininfo_response["email"] in email_whitelist:
-        print("creating admin")
         admin = Admin(
             email=admininfo_response["email"],
             first_name=admininfo_response["first_name"],
@@ -214,7 +206,6 @@ def callback():
         return redirect(redirect_url)
 
     if admin and admin.email in email_whitelist:
-        print("Admin exists and email whitelisted")
         session["admin_id"] = admin.id
         admin.is_active = True
         db.session.add(admin)
