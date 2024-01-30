@@ -17,7 +17,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -193,8 +193,8 @@ def callback():
     if not admin and admininfo_response["email"] in email_whitelist:
         admin = Admin(
             email=admininfo_response["email"],
-            first_name=admininfo_response["first_name"],
-            last_name=admininfo_response["last_name"],
+            first_name=admininfo_response["given_name"],
+            last_name=admininfo_response["family_name"],
             picture=admininfo_response["picture"],
             name=admininfo_response["name"],
         )
