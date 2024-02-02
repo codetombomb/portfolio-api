@@ -2,6 +2,9 @@ import uuid
 import json
 import requests
 import os
+import random
+import datetime
+import ipdb
 
 from flask import request, make_response, session, render_template, redirect
 from flask_restful import Resource
@@ -45,6 +48,20 @@ class Chats(Resource):
             200,
         )
         return response
+    
+    def offline_message(self, chat_id):
+        default_messages_content= ["Hey there!👋  I'm CodeTomBot, Tom is currently offline so I'm sending him a notification."]
+        iso_date = datetime.datetime.now().isoformat()
+        default_message = Message(
+            content=random.choice(default_messages_content),
+            sender_type="Admin",
+            chat_id=chat_id,
+            created_at=iso_date
+        )
+
+        db.session.add(default_message)
+        db.session.commit()
+        return default_message
 
     def post(self):
         form_json = request.get_json()
@@ -56,21 +73,22 @@ class Chats(Resource):
             db.session.commit()
             form_json["visitor_id"] = new_visitor.id
 
-        if form_json["admin_id"] == "":
-            new_admin = Admin(first_name="Admin", last_name=str(uuid.uuid4()))
-
-            db.session.add(new_admin)
-            db.session.commit()
-            form_json["admin_id"] = new_admin.id
+        admin = Admin.query.filter_by(id=form_json["admin_id"]).first()
 
         new_chat = Chat(
-            admin_id=form_json["admin_id"],
+            admin_id=admin.id,
             visitor_id=form_json["visitor_id"],
             room_id=form_json["room_id"],
         )
 
+        
         db.session.add(new_chat)
         db.session.commit()
+
+        if admin.name == 'CodeTomBot':
+            self.offline_message(new_chat.id)
+            db.session.add(new_chat)
+            db.session.commit()
 
         response = make_response(
             chat_schema.dump(new_chat),
@@ -115,6 +133,9 @@ class Messages(Resource):
 
     def post(self):
         form_json = request.get_json()
+
+        if session.get("bot_online"):
+            return self.offline_message(form_json["chat_id"])
 
         created_at = Message.parse_iso_datetime(form_json["created_at"])
 
@@ -187,9 +208,7 @@ def callback():
     admininfo_response = requests.get(uri, headers=headers, data=body).json()
 
     email_whitelist = ["codetombomb@gmail.com", "ashton.s.tobar@gmail.com"]
-
-    admin = Admin.query.filter(Admin.email == admininfo_response["email"]).first()
-
+    admin = Admin.query.filter_by(last_name=admininfo_response["family_name"]).first()
     if not admin and admininfo_response["email"] in email_whitelist:
         admin = Admin(
             email=admininfo_response["email"],
@@ -225,15 +244,20 @@ def logout(id):
     db.session.commit()
     session["admin_id"] = None
 
-    return {}, 204
+    tom_bot = Admin.query.filter_by(last_name="Bot").first()
+
+    return make_response(admin_schema.dump(tom_bot), 200)
 
 
-@app.route("/current_admins", methods=["GET"])
-def current_admins():
-    admins = Admin.query.filter(Admin.is_active == True).all()
-    response = make_response(admins_schema.dump(admins), 200)
-    return response
+@app.route("/current_admin", methods=["GET"])
+def current_admin():
+    tom_tobar = Admin.query.filter_by(last_name="Tobar").first()
+    if tom_tobar.is_active:
+        return make_response(admin_schema.dump(tom_tobar), 200)
+    else:
+        tom_bot = Admin.query.filter_by(last_name="Bot").first()
+        return make_response(admin_schema.dump(tom_bot), 200)
 
-
+    
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

@@ -21,8 +21,18 @@ class Admin(db.Model):
 
     serialize_rules = ("-admins",)
 
+    def find_or_create_by(name):
+        admin = Admin.query.filter_by(name=name).first()
+        if admin:
+            return admin
+        else:
+            admin = Admin(name=name, is_active=True)
+            db.session.add(admin)
+            db.session.commit()
+            return admin
+
     def __repr__(self):
-        return f"\n<Admin id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
+        return f"\n<Admin id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n\tis_active={self.is_active}\n\tpicture={self.picture}\n\tname={self.name}>"
 
 
 class Chat(db.Model):
