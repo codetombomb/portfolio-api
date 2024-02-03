@@ -17,10 +17,11 @@ from serializers import (
     chats_schema,
     chat_schema,
     message_schema,
+    messages_schema
 )
 
 # For developement (allow http for oauthlib) - remove from production
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -126,6 +127,22 @@ class ChatsById(Resource):
 
 api.add_resource(ChatsById, "/chats/<int:id>")
 
+@app.route("/chatroom-update", methods=["POST"])
+def chatroom_update():
+        form_json = request.get_json()
+        rooms = Chat.query.filter(Chat.room_id.in_(form_json["rooms"])).all()
+        for room in rooms:
+            new_message = Message(
+                    content=f"{form_json['admin_name']} joined the chat",
+                    sender_type="Update",
+                    chat_id=room
+            )
+            room.messages.append(new_message)
+            db.session.add(room)
+            db.session.commit()
+        return make_response(chats_schema.dump(rooms), 200)
+        
+
 
 class Messages(Resource):
     def get(self):
@@ -133,9 +150,6 @@ class Messages(Resource):
 
     def post(self):
         form_json = request.get_json()
-
-        if session.get("bot_online"):
-            return self.offline_message(form_json["chat_id"])
 
         created_at = Message.parse_iso_datetime(form_json["created_at"])
 

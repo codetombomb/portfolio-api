@@ -51,7 +51,7 @@ class Chat(db.Model):
     messages = db.relationship("Message", backref="chats")
 
     def __repr__(self):
-        return f"\n<Chat id={self.id},\n\tcreated_at={self.created_at},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id} \n>"
+        return f"\n<Chat id={self.id},\n\tcreated_at={self.created_at},\n\tadmin_id={self.admin_id},\n\tvisitor_id={self.visitor_id}\n\t,room_id={self.room_id} \n>"
 
 
 class Message(db.Model):
