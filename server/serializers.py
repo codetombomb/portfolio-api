@@ -43,8 +43,6 @@ class AdminSchema(ma.SQLAlchemySchema):
     picture = ma.auto_field()
     name = ma.auto_field()
     is_active = ma.auto_field()
-
-    chats = ma.Nested(ChatSchema(only=("id", "visitor_id", "messages", "is_active", "room_id")),many=True)
     
 admin_schema = AdminSchema()
 admins_schema = AdminSchema(many=True)
