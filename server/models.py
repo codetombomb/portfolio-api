@@ -1,10 +1,7 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy_serializer import SerializerMixin
-
 from config import db
-
 from datetime import datetime
-
 
 class Admin(db.Model):
     __tablename__ = "admins"
@@ -43,9 +40,6 @@ class Chat(db.Model):
     admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"))
     visitor_id = db.Column(db.Integer, db.ForeignKey("visitors.id"))
     room_id = db.Column(db.String)
-    
-    
-
     is_active = db.Column(db.Boolean, default=True)
 
     messages = db.relationship("Message", backref="chats")
@@ -93,3 +87,17 @@ class Visitor(db.Model):
 
     def __repr__(self):
         return f"\n<User id={self.id},\n\tfirst_name={self.first_name},\n\tlast_name={self.last_name}\n\temail={self.email}\n>"
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"), nullable=True)
+    message = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    admin = db.relationship("Admin", foreign_keys=[admin_id], backref="admin_notifications")
+
+    def __repr__(self):
+        return f"\n<Notification id={self.id},\n\tadmin_id={self.admin_id},\n\tmessage={self.message},\n\tstatus={self.status},\n\tcreated_at={self.created_at}\n>"
