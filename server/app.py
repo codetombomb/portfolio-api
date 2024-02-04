@@ -21,7 +21,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
