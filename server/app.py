@@ -50,7 +50,7 @@ class Chats(Resource):
         )
         return response
     
-    def offline_message(self, chat_id):
+    def offline_message(self, chat_id, message="Visitor is trying to chat!"):
         default_messages_content= ["Hey there!👋  I'm CodeTomBot, Tom is currently offline so I'm sending him a notification."]
         iso_date = datetime.datetime.now().isoformat()
         default_message = Message(
@@ -60,7 +60,15 @@ class Chats(Resource):
             created_at=iso_date
         )
 
-        db.session.add(default_message)
+        tom = Admin.query.filter_by(last_name="Tobar").first()
+
+        notification = Notification(
+            admin_id=tom.id,
+            message=message,
+            status="unread"
+        )
+
+        db.session.add_all([default_message, notification])
         db.session.commit()
         return default_message
 
@@ -235,7 +243,7 @@ def callback():
         session["admin_id"] = admin.id
         db.session.add(admin)
         db.session.commit()
-        redirect_url = f"{os.environ.get('FRONTEND_URL')}/?admin={admin_schema.dumps(admin)}"
+        redirect_url = f"{os.environ.get('FRONTEND_URL')}/admin/?admin={admin_schema.dumps(admin)}"
         return redirect(redirect_url)
 
     if admin and admin.email in email_whitelist:
@@ -243,7 +251,7 @@ def callback():
         admin.is_active = True
         db.session.add(admin)
         db.session.commit()
-        redirect_url = f"{os.environ.get('FRONTEND_URL')}/?admin={admin_schema.dumps(admin)}"
+        redirect_url = f"{os.environ.get('FRONTEND_URL')}/admin/?admin={admin_schema.dumps(admin)}"
         return redirect(redirect_url)
     else:
         response = make_response({"errors": ["Not authorized"]}, 401)
