@@ -21,7 +21,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 @app.route("/")
 def index():
@@ -141,7 +141,7 @@ def chatroom_update():
         rooms = Chat.query.filter(Chat.room_id.in_(form_json["rooms"])).all()
         for room in rooms:
             new_message = Message(
-                    content=f"{form_json["admin_name"]} joined the chat",
+                    content=f"{form_json['admin_name']} joined the chat",
                     sender_type="Update",
                     chat_id=room
             )
