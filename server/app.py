@@ -9,7 +9,7 @@ import ipdb
 from flask import request, make_response, session, render_template, redirect
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
-from models import Visitor, Admin, Chat, Message
+from models import Visitor, Admin, Chat, Message, Notification, DeviceToken
 from config import app, api, db, client
 from serializers import (
     admin_schema,
@@ -17,11 +17,13 @@ from serializers import (
     chats_schema,
     chat_schema,
     message_schema,
-    messages_schema
+    messages_schema,
+    device_token_schema,
+    device_tokens_schema
 )
 
 # For developement (allow http for oauthlib) - remove from production
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 @app.route("/")
 def index():
@@ -185,6 +187,52 @@ class Messages(Resource):
 
 
 api.add_resource(Messages, "/messages")
+
+class DeviceTokens(Resource):
+    def post(self):
+        json_data = request.get_json()
+        
+        if DeviceToken.query.filter_by(token=json_data["token"]).first():
+                return make_response({"errors": ["A device with that token already exists"]}, 400)
+        
+        device_token = DeviceToken(
+            token=json_data["token"],
+            admin_id=json_data["admin_id"]
+        )
+        
+        db.session.add(device_token)
+        db.session.commit()
+        return make_response({"message": "Device Token created successfully"}, 201)
+
+api.add_resource(DeviceTokens, "/device_tokens")
+
+
+class DeviceTokenById(Resource):
+    def get(self, token):
+        device_token = DeviceToken.query.filter_by(token=token).first()
+        if device_token:
+            return make_response(admin_schema.dump(device_token), 200)
+        
+    def put(self, token):
+        json_data = request.get_json()
+        pass device_token = DeviceToken.query.filter_by(token=token).first()
+
+        if device_token:
+            device_token.admin_id = json_data['admin_id']
+            db.session.commit()
+            return make_response({'message': 'Device token updated successfully.'}, 200)
+        return make_response({'message': 'Device token not found'}, 404)
+
+    def delete(self, token):
+        device_token = DeviceToken.query.filter_by(token=token).first()
+        if device_token:
+            db.session.delete(device_token)
+            db.session.commit()
+            return make_response({'message': 'Device token deleted successfully.'}, 200)
+        return make_response({'message': 'Device token not found'}, 404)
+
+api.add_resource(DeviceTokenById, "/device_tokens/<string:token>")
+
 
 def get_google_provider_cfg():
     return requests.get(os.environ.get("GOOGLE_DISCOVERY_URL")).json()

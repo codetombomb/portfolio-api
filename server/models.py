@@ -101,3 +101,19 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"\n<Notification id={self.id},\n\tadmin_id={self.admin_id},\n\tmessage={self.message},\n\tstatus={self.status},\n\tcreated_at={self.created_at}\n>"
+
+
+
+class DeviceToken(db.Model):
+    __tablename__ = "device_tokens"
+
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(256), unique=True, nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey("admins.id"), nullable=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+    admin = db.relationship("Admin", foreign_keys=[admin_id], backref="admin_device_tokens")
+
+    def __repr__(self):
+        return f"\n<DeviceToken id={self.id},\n\ttoken={self.token},\n\tadmin_id={self.admin_id},\n\tcreated_at={self.created_at},\n\tupdated_at={self.updated_at}\n>"
