@@ -60,16 +60,3 @@ class VisitorSchema(ma.SQLAlchemySchema):
     
 visitor_schema = VisitorSchema()
 visitors_schema = VisitorSchema(many=True)
-
-class DeviceTokenSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = DeviceToken
-    
-    id = ma.auto_field()
-    token = ma.auto_field()
-    admin_id = ma.auto_field()
-    created_at = ma.auto_field()
-    updated_at = ma.auto_field()
-
-device_token_schema = DeviceTokenSchema()
-device_tokens_schema = DeviceTokenSchema(many=True)
