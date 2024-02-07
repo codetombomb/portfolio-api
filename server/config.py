@@ -12,6 +12,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from oauthlib.oauth2 import WebApplicationClient
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("./serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_KEY")

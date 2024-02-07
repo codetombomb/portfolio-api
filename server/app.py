@@ -5,11 +5,12 @@ import os
 import random
 import datetime
 import ipdb
+from firebase_admin import messaging
 
 from flask import request, make_response, session, render_template, redirect
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
-from models import Visitor, Admin, Chat, Message, Notification, DeviceToken
+from models import Visitor, Admin, Chat, Message, DeviceToken
 from config import app, api, db, client
 from serializers import (
     admin_schema,
@@ -62,13 +63,18 @@ class Chats(Resource):
 
         tom = Admin.query.filter_by(last_name="Tobar").first()
 
-        notification = Notification(
-            admin_id=tom.id,
-            message=message,
-            status="unread"
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title="A visitor is in the chat!",
+                body="A visitor is in the chat! Hurry up before they're gone!",
+                image="https://raw.githubusercontent.com/codetombomb/portfolio-front-end/56db90fdd60a6f0fecee82719a6de131409d1e96/public/tom.svg"
+            ),
+            topic="chat_active"
         )
 
-        db.session.add_all([default_message, notification])
+        response = messaging.send(message)
+
+        db.session.add(default_message)
         db.session.commit()
         return default_message
 
@@ -176,6 +182,17 @@ class Messages(Resource):
         db.session.add(new_message)
         db.session.commit()
 
+        notification = messaging.Message(
+            notification=messaging.Notification(
+                title=f"{new_message.sender_type} sent a message",
+                body=f"{new_message.sender_type} sent a message",
+                image="https://raw.githubusercontent.com/codetombomb/portfolio-front-end/56db90fdd60a6f0fecee82719a6de131409d1e96/public/tom.svg"
+            ),
+            topic="chat_active"
+        )
+
+        messaging.send(notification)
+
         response = make_response(
             message_schema.dump(new_message),
             201,
@@ -197,6 +214,8 @@ class DeviceTokens(Resource):
             token=json_data["token"],
             admin_id=json_data.get("admin_id")
         )
+
+        response = messaging.subscribe_to_topic([device_token.token], "chat_active")
         
         db.session.add(device_token)
         db.session.commit()
@@ -215,15 +234,11 @@ class DeviceTokenById(Resource):
         
     def put(self, token):
         json_data = request.get_json()
-        print(json_data)
         device_token = DeviceToken.query.filter_by(token=token).first()
-        print(json_data.get("token"))
         if device_token:
             if json_data.get("admin_id"):
-                print("has admin_id")
                 device_token.admin_id = json_data.get("admin_id")
             if json_data.get("token"):
-                print("has token")
                 device_token.token = json_data.get("token")
             db.session.add(device_token)
             db.session.commit()
