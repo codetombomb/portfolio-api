@@ -1,5 +1,5 @@
 from config import ma
-from models import Admin, Chat, Message, Visitor
+from models import Admin, Chat, Message, Visitor, DeviceToken
 
 class MessageSchema(ma.SQLAlchemySchema):
     class Meta:

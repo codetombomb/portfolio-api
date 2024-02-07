@@ -9,7 +9,7 @@ import ipdb
 from flask import request, make_response, session, render_template, redirect
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
-from models import Visitor, Admin, Chat, Message
+from models import Visitor, Admin, Chat, Message, Notification, DeviceToken
 from config import app, api, db, client
 from serializers import (
     admin_schema,
@@ -21,7 +21,7 @@ from serializers import (
 )
 
 # For developement (allow http for oauthlib) - remove from production
-# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 @app.route("/")
 def index():
@@ -94,7 +94,7 @@ class Chats(Resource):
         db.session.add(new_chat)
         db.session.commit()
 
-        if admin.name == 'CodeTomBot':
+        if admin.name == "CodeTomBot":
             self.offline_message(new_chat.id)
             db.session.add(new_chat)
             db.session.commit()
@@ -141,7 +141,7 @@ def chatroom_update():
         rooms = Chat.query.filter(Chat.room_id.in_(form_json["rooms"])).all()
         for room in rooms:
             new_message = Message(
-                    content=f"{form_json['admin_name']} joined the chat",
+                    content=f"{form_json["admin_name"]} joined the chat",
                     sender_type="Update",
                     chat_id=room
             )
@@ -186,6 +186,61 @@ class Messages(Resource):
 
 api.add_resource(Messages, "/messages")
 
+class DeviceTokens(Resource):
+    def post(self):
+        json_data = request.get_json()
+        
+        if DeviceToken.query.filter_by(token=json_data["token"]).first():
+                return make_response({"errors": ["A device with that token already exists"]}, 400)
+        
+        device_token = DeviceToken(
+            token=json_data["token"],
+            admin_id=json_data.get("admin_id")
+        )
+        
+        db.session.add(device_token)
+        db.session.commit()
+        return make_response({"message": "Device Token created successfully"}, 201)
+
+api.add_resource(DeviceTokens, "/device_tokens")
+
+
+class DeviceTokenById(Resource):
+    def get(self, token):
+        device_token = DeviceToken.query.filter_by(token=token).first()
+        if device_token:
+            return make_response(admin_schema.dump(device_token), 200)
+        else: 
+            return make_response({"errors": ["Device token not found"]}, 404)
+        
+    def put(self, token):
+        json_data = request.get_json()
+        print(json_data)
+        device_token = DeviceToken.query.filter_by(token=token).first()
+        print(json_data.get("token"))
+        if device_token:
+            if json_data.get("admin_id"):
+                print("has admin_id")
+                device_token.admin_id = json_data.get("admin_id")
+            if json_data.get("token"):
+                print("has token")
+                device_token.token = json_data.get("token")
+            db.session.add(device_token)
+            db.session.commit()
+            return make_response({"message": "Device token updated successfully."}, 200)
+        return make_response({"errors": ["Device token not found"]}, 404)
+
+    def delete(self, token):
+        device_token = DeviceToken.query.filter_by(token=token).first()
+        if device_token:
+            db.session.delete(device_token)
+            db.session.commit()
+            return make_response({"message": "Device token deleted successfully."}, 200)
+        return make_response({"message": "Device token not found"}, 404)
+
+api.add_resource(DeviceTokenById, "/device_tokens/<string:token>")
+
+
 def get_google_provider_cfg():
     return requests.get(os.environ.get("GOOGLE_DISCOVERY_URL")).json()
 
@@ -197,7 +252,7 @@ def login():
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url + "/callback",
-        scope=['openid', 'email', 'profile']
+        scope=["openid", "email", "profile"]
     )
 
     return redirect(request_uri)
@@ -220,7 +275,7 @@ def callback():
         token_url,
         headers=headers,
         data=body,
-        auth=(os.environ.get('GOOGLE_CLIENT_ID'), os.environ.get('GOOGLE_CLIENT_SECRET'))
+        auth=(os.environ.get("GOOGLE_CLIENT_ID"), os.environ.get("GOOGLE_CLIENT_SECRET"))
     )
 
     client.parse_request_body_response(json.dumps(token_response.json()))
