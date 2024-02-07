@@ -15,8 +15,12 @@ from oauthlib.oauth2 import WebApplicationClient
 import firebase_admin
 from firebase_admin import credentials
 
-cred = credentials.Certificate("./serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+# Deploy config
+service_account_path = '/etc/secrets/serviceAccountKey.json'
+cred = credentials.Certificate(service_account_path)
+
+# cred = credentials.Certificate("./serviceAccountKey.json")
+# firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_KEY")
