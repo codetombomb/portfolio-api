@@ -18,6 +18,7 @@ from firebase_admin import credentials
 # Deploy config
 service_account_path = '/etc/secrets/serviceAccountKey.json'
 cred = credentials.Certificate(service_account_path)
+firebase_admin.initialize_app(cred)
 
 # For developement (allow http for oauthlib) - remove from production
 # os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
