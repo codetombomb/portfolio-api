@@ -21,9 +21,6 @@ from serializers import (
     messages_schema
 )
 
-# For developement (allow http for oauthlib) - remove from production
-# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -51,22 +48,25 @@ class Chats(Resource):
         )
         return response
     
-    def offline_message(self, chat_id, message="Visitor is trying to chat!"):
-        default_messages_content= ["Hey there!👋  I'm CodeTomBot, Tom is currently offline so I'm sending him a notification."]
-        iso_date = datetime.datetime.now().isoformat()
-        default_message = Message(
-            content=random.choice(default_messages_content),
-            sender_type="Admin",
+    def offline_message(self, chat_id, created_at):
+        default_message_one = Message(
+            content="Hey! 👋🤖 CodeTomBot here. Tom's not around right now, so I'm hitting him up on your behalf. Hang tight for a bit while I work my magic to reach him.",
+            sender_type="Bot",
             chat_id=chat_id,
-            created_at=iso_date
+            created_at=created_at
         )
 
-        tom = Admin.query.filter_by(last_name="Tobar").first()
+        default_message_two = Message(
+            content="Fancy leaving a message? Feel free to share your contact info and whatever you need to tell Tom; he'll follow up the moment he's back in action.😃",
+            sender_type="Bot",
+            chat_id=chat_id,
+            created_at=created_at
+        )
 
         message = messaging.Message(
             notification=messaging.Notification(
-                title="A visitor is in the chat!",
-                body="A visitor is in the chat! Hurry up before they're gone!",
+                title="🤖 CodeTomBot Alert!!",
+                body="A visitor is in the chat!!!",
                 image="https://raw.githubusercontent.com/codetombomb/portfolio-front-end/56db90fdd60a6f0fecee82719a6de131409d1e96/public/tom.svg"
             ),
             topic="chat_active"
@@ -74,9 +74,9 @@ class Chats(Resource):
 
         response = messaging.send(message)
 
-        db.session.add(default_message)
+        db.session.add_all([default_message_one, default_message_two])
         db.session.commit()
-        return default_message
+        return
 
     def post(self):
         form_json = request.get_json()
@@ -94,6 +94,7 @@ class Chats(Resource):
             admin_id=admin.id,
             visitor_id=form_json["visitor_id"],
             room_id=form_json["room_id"],
+            created_at=form_json["created_at"]
         )
 
         
@@ -101,7 +102,7 @@ class Chats(Resource):
         db.session.commit()
 
         if admin.name == "CodeTomBot":
-            self.offline_message(new_chat.id)
+            self.offline_message(new_chat.id, form_json["created_at"])
             db.session.add(new_chat)
             db.session.commit()
 
@@ -182,16 +183,17 @@ class Messages(Resource):
         db.session.add(new_message)
         db.session.commit()
 
-        notification = messaging.Message(
-            notification=messaging.Notification(
-                title=f"{new_message.sender_type} sent a message",
-                body=f"{new_message.sender_type} sent a message",
-                image="https://raw.githubusercontent.com/codetombomb/portfolio-front-end/56db90fdd60a6f0fecee82719a6de131409d1e96/public/tom.svg"
-            ),
-            topic="chat_active"
-        )
+        if new_message.sender_type == "Visitor":
+            notification = messaging.Message(
+                notification=messaging.Notification(
+                    title=f"{new_message.sender_type} sent a message",
+                    body=new_message.content,
+                    image="https://raw.githubusercontent.com/codetombomb/portfolio-front-end/56db90fdd60a6f0fecee82719a6de131409d1e96/public/tom.svg"
+                ),
+                topic="chat_active"
+            )
 
-        messaging.send(notification)
+            messaging.send(notification)
 
         response = make_response(
             message_schema.dump(new_message),
